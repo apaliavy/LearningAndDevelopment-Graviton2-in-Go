@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  A tiny project to compare x86 and Graviton2 performance
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  FibonacciARMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/fibo-lambda/
+      Handler: app
+      Runtime: provided.al2
+      Architectures:
+        - arm64
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /arm64/number
+            Method: GET
+    Metadata:
+      BuildMethod: makefile
+  FibonacciX86Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/fibo-lambda/
+      Handler: app
+      Runtime: provided.al2
+      Architectures:
+        - x86_64
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /x86/number
+            Method: GET
+    Metadata:
+      BuildMethod: makefile
+  EchoARMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/echo-lambda/
+      Handler: app
+      Runtime: provided.al2
+      Architectures:
+        - arm64
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /arm64
+            Method: GET
+    Metadata:
+      BuildMethod: makefile
+  EchoX86Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/echo-lambda/
+      Handler: app
+      Runtime: provided.al2
+      Architectures:
+        - x86_64
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /x86
+            Method: GET
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  EchoAPI:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/echo/"
+  EchoARMFunction:
+    Description: "ARM64 binary"
+    Value: !GetAtt EchoARMFunction.Arn
+  EchoARMFunctionIamRole:
+    Description: "Implicit IAM Role created for EchoARMFunction"
+    Value: !GetAtt EchoARMFunctionRole.Arn
+  EchoX86Function:
+    Description: "X86 binary"
+    Value: !GetAtt EchoX86Function.Arn
+  EchoX86FunctionIamRole:
+    Description: "Implicit IAM Role created for EchoX86Function"
+    Value: !GetAtt EchoX86Function.Arn
+  FibonacciAPI:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/fibonacci/"
+  FibonacciARMFunction:
+    Description: "ARM64 binary"
+    Value: !GetAtt FibonacciARMFunction.Arn
+  FibonacciARMFunctionIamRole:
+    Description: "Implicit IAM Role created for FibonacciARMFunction"
+    Value: !GetAtt FibonacciARMFunctionRole.Arn
+  FibonacciX86Function:
+    Description: "X86 binary"
+    Value: !GetAtt FibonacciX86Function.Arn
+  FibonacciX86FunctionIamRole:
+    Description: "Implicit IAM Role created for FibonacciX86Function"
+    Value: !GetAtt FibonacciX86Function.Arn
